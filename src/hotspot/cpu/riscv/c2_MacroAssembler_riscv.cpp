@@ -3080,6 +3080,14 @@ void C2_MacroAssembler::reduce_mul_integral_v(Register dst, Register src1, Vecto
 // Set vl and vtype for full and partial vector operations.
 // (vma = mu, vta = tu, vill = false)
 void C2_MacroAssembler::vsetvli_helper(BasicType bt, uint vector_length, LMUL vlmul, Register tmp) {
+  if (_last_vsetvli_helper_valid &&
+      _last_vsetvli_helper_bt == bt &&
+      _last_vsetvli_helper_vector_length == vector_length &&
+      _last_vsetvli_helper_vlmul == vlmul &&
+      _last_vsetvli_helper_tmp == tmp) {
+    return;
+  }
+
   Assembler::SEW sew = Assembler::elemtype_to_sew(bt);
   if (vector_length <= 31) {
     vsetivli(tmp, vector_length, sew, vlmul);
@@ -3089,6 +3097,12 @@ void C2_MacroAssembler::vsetvli_helper(BasicType bt, uint vector_length, LMUL vl
     mv(tmp, vector_length);
     vsetvli(tmp, tmp, sew, vlmul);
   }
+
+  _last_vsetvli_helper_valid = true;
+  _last_vsetvli_helper_bt = bt;
+  _last_vsetvli_helper_vector_length = vector_length;
+  _last_vsetvli_helper_vlmul = vlmul;
+  _last_vsetvli_helper_tmp = tmp;
 }
 
 void C2_MacroAssembler::compare_integral_v(VectorRegister vd, VectorRegister src1, VectorRegister src2,

@@ -947,6 +947,7 @@ void MacroAssembler::j(const address dest, Register temp) {
     la(temp, dest, offset);
     jr(temp, offset);
   }
+  invalidate_last_vsetvli_helper();
 }
 
 void MacroAssembler::j(const Address &dest, Register temp) {
@@ -972,6 +973,7 @@ void MacroAssembler::j(const Address &dest, Register temp) {
     default:
       ShouldNotReachHere();
   }
+  invalidate_last_vsetvli_helper();
 }
 
 void MacroAssembler::j(Label &lab, Register temp) {

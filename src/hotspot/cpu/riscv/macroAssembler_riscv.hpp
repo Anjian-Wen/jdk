@@ -39,10 +39,19 @@
 // on arguments should also go in here.
 
 class MacroAssembler: public Assembler {
+ private:
+  bool      _last_vsetvli_helper_valid;
+  BasicType _last_vsetvli_helper_bt;
+  uint      _last_vsetvli_helper_vector_length;
+  LMUL      _last_vsetvli_helper_vlmul;
+  Register  _last_vsetvli_helper_tmp;
 
  public:
+  void invalidate_last_vsetvli_helper() { _last_vsetvli_helper_valid = false; }
 
-  MacroAssembler(CodeBuffer* code) : Assembler(code) {}
+  MacroAssembler(CodeBuffer* code) : Assembler(code) {
+   invalidate_last_vsetvli_helper();
+ }
 
   void safepoint_poll(Label& slow_path, bool at_return, bool in_nmethod, Register tmp_reg = t0);
 
@@ -875,6 +884,7 @@ public:
     Assembler::bind(L);
     // fences across basic blocks should not be merged
     code()->clear_last_insn();
+    invalidate_last_vsetvli_helper();
   }
 
   typedef void (MacroAssembler::* compare_and_branch_insn)(Register Rs1, Register Rs2, const address dest);
